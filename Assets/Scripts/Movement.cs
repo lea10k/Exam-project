@@ -11,6 +11,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
 
+    public bool isOnPlatform;
+    public Rigidbody2D platformRb;
+
     [System.Obsolete]
     void Update()
     {
@@ -32,7 +35,17 @@ public class PlayerMovement : MonoBehaviour
     [System.Obsolete]
     private void FixedUpdate()
     {
-        rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
+        float targetSpeed = speed * horizontal;
+
+        // Überprüfen, ob der Spieler auf einer Plattform ist
+        if (isOnPlatform && platformRb != null)
+        {
+            rb.velocity = new Vector2(targetSpeed + platformRb.velocity.x, rb.velocity.y);
+        }
+        else
+        {
+            rb.velocity = new Vector2(targetSpeed, rb.velocity.y);
+        }
     }
 
     private bool IsGrounded()

@@ -1,4 +1,6 @@
 using UnityEditor.Callbacks;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
@@ -8,9 +10,19 @@ public class MovingPlatform : MonoBehaviour
     public float speed;
     Vector3 targetPos;
 
+    PlayerMovement movementController;
+    Rigidbody2D rb;
+    Vector3 moveDirection;
+
+    private void Awake()
+    {
+        movementController = GameObject.FindGameObjectsWithTag("Player")[0].GetComponent<PlayerMovement>();
+        rb = GetComponent<Rigidbody2D>();
+    }
     private void Start()
     {
         targetPos = PosB.position;
+        DirectionCalculate();
     }
 
     // Update is called once per frame
@@ -19,19 +31,30 @@ public class MovingPlatform : MonoBehaviour
         if (Vector2.Distance(transform.position, PosA.position) < 0.5f)
         {
             targetPos = PosB.position;
+            DirectionCalculate();
         }
         else if (Vector2.Distance(transform.position, PosB.position) < 0.5f)
         {
             targetPos = PosA.position;
+            DirectionCalculate();
         }
-        transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
+       // transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
     }
 
+    private void FixedUpdate()
+    {
+        rb.linearVelocity = moveDirection * speed;
+    }
+
+    void DirectionCalculate(){
+        moveDirection = (targetPos - transform.position).normalized;
+    }
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
         {
-            collision.transform.parent = this.transform;
+            movementController.isOnPlatform = true;
+            movementController.platformRb = rb;
         }
     }
 
@@ -39,7 +62,7 @@ public class MovingPlatform : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            collision.transform.parent = null;
+            movementController.isOnPlatform = false;
         }
     }
 }
