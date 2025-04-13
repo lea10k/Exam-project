@@ -14,13 +14,10 @@ public class MovingPlatform : MonoBehaviour
     Rigidbody2D rb;
     Vector3 moveDirection;
 
-    Rigidbody2D playerRb;
-
     private void Awake()
     {
         movementController = GameObject.FindGameObjectsWithTag("Player")[0].GetComponent<PlayerMovement>();
         rb = GetComponent<Rigidbody2D>();
-        playerRb = GameObject.FindGameObjectsWithTag("Player")[0].GetComponent<Rigidbody2D>();
     }
     private void Start()
     {
@@ -58,7 +55,6 @@ public class MovingPlatform : MonoBehaviour
         {
             movementController.isOnPlatform = true;
             movementController.platformRb = rb;
-            playerRb.gravityScale = playerRb.gravityScale * 12.5f;
         }
     }
 
@@ -67,7 +63,6 @@ public class MovingPlatform : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             movementController.isOnPlatform = false;
-            playerRb.gravityScale = playerRb.gravityScale / 12.5f;
         }
     }
 }
