@@ -18,9 +18,8 @@ public class PlatformSpawner : MonoBehaviour
     public float maxJumpWidth = 5f;  // Max horizontal jump distance
 
     [Header("Spacing Rules")]
-    public float minVerticalSpacing = 2.5f; // Min vertical gap between platforms
-    public float maxVerticalSpacing = 5.5f; // Max vertical gap between platforms
-    public float minHorizontalDistance = 2.5f; // Platforms can't spawn too close horizontally
+    public float verticalSpacing = 2.5f; // Min vertical gap between platforms
+    public float horizontalDistance = 3f; // Platforms can't spawn too close horizontally
 
     // Internal tracking variables
     private float lastY = 0f; // Last platform's Y position
@@ -30,94 +29,127 @@ public class PlatformSpawner : MonoBehaviour
     private int lastIndex = -1; // Last used platform prefab index
 
     void Start()
+{   
+    Instantiate(platformPrefabs[0], new Vector2(5f, 0f), Quaternion.identity); // Spawn the first static platform at (0,0)
+    lastY = 0f; // Reset last Y position
+    lastX = 5f;
+    lastIndex = 0; // Reset last index to static platform
+    for (int i = 0; i < 10; i++) GeneratePlatform();
+}
+
+void Update()
+{
+    // If player gets close to the last Y height, spawn more platforms
+    if (player.position.y + 10f > lastY)
     {
-        // Spawn 10 platforms at the beginning
-        for (int i = 0; i < 10; i++) GeneratePlatform();
+        GeneratePlatform();
     }
+}
 
-    void Update()
+int counterNeg = 0; // Number of consecutive left spawns
+int counterPos = 0; // Number of consecutive right spawns
+
+void GeneratePlatform()
+{
+    int index = SelectPlatformIndex();
+    GameObject prefab = platformPrefabs[index];
+
+    float spawnX = lastX;
+    float maxPath = 10f;
+
+    bool canGoLeft = counterNeg < 3;
+    bool canGoRight = counterPos < 3;
+
+    if (lastX >= maxPath)
     {
-        // If player gets close to the last Y height, spawn more platforms
-        if (player.position.y + 10f > lastY)
-        {
-            GeneratePlatform();
-        }
+        // Too far right, force spawn left
+        spawnX = lastX - horizontalDistance;
+        counterNeg++;
+        counterPos = 0;
     }
-
-    void GeneratePlatform()
+    else if (lastX <= -maxPath)
     {
-        int index = SelectPlatformIndex(); // Choose which platform prefab to use
-        GameObject prefab = platformPrefabs[index];
-
-        // Pick a new X position, make sure it's not too close to the last X
-        float spawnX;
-        int maxTries = 10;
-        int tries = 0;
-        do {
-            spawnX = Random.Range(-horizontalRange, horizontalRange);
-            tries++;
-        } while (Mathf.Abs(spawnX - lastX) < minHorizontalDistance && tries < maxTries);
-        lastX = spawnX;
-
-        // Choose random Y distance between min and max spacing
-        float deltaY = Random.Range(minVerticalSpacing, maxVerticalSpacing);
-        float spawnY = lastY + deltaY;
-
-        float movementHeight = 0f;
-
-        // If it's a vertical moving platform, get its movement height and adjust spawnY
-        if (index == 2)
+        // Too far left, force spawn right
+        spawnX = lastX + horizontalDistance;
+        counterPos++;
+        counterNeg = 0;
+    }
+    else if (lastX == 0)
+    {
+        // Centered → pick random direction, but respect counters
+        if (canGoLeft && canGoRight)
         {
-            movementHeight = GetMaxYFromPrefab(prefab);
-            spawnY = Mathf.Max(spawnY, lastY + movementHeight);
-        }
-
-        // If it's a horizontal moving platform, check its range and adjust spawnY/X if needed
-        if (index == 1)
-        {
-            float movementWidth = GetMaxXFromPrefab(prefab);
-            float halfField = fieldWidth / 2f;
-
-            if (Mathf.Abs(spawnX) + movementWidth > halfField)
+            if (Random.value < 0.5f)
             {
-                spawnX = Mathf.Sign(spawnX) * (halfField - movementWidth);
+                spawnX = lastX - horizontalDistance;
+                counterNeg++;
+                counterPos = 0;
             }
-
-            movementHeight = GetMaxYFromPrefab(prefab);
-            spawnY = Mathf.Max(spawnY, lastY + movementHeight);
+            else
+            {
+                spawnX = lastX + horizontalDistance;
+                counterPos++;
+                counterNeg = 0;
+            }
         }
-
-        Vector2 spawnPos = new Vector2(spawnX, spawnY);
-        Instantiate(prefab, spawnPos, Quaternion.identity); // Spawn the chosen platform
-
-        // If the vertical gap is too big, add a helper static platform in between
-        float actualGap = spawnY - lastY;
-        if (actualGap > maxJumpHeight)
+        else if (canGoLeft)
         {
-            float helperY = lastY + actualGap / 2f;
-            float helperX = Random.Range(-maxJumpWidth, maxJumpWidth);
-            Vector2 helperPos = new Vector2(helperX, helperY);
-            Instantiate(platformPrefabs[0], helperPos, Quaternion.identity);
+            spawnX = lastX - horizontalDistance;
+            counterNeg++;
+            counterPos = 0;
         }
-
-        // Update trackers
-        lastY = spawnY;
-        lastIndex = index;
-        spawnCounter++;
-        if (IsDynamic(index)) dynamicCount++;
-
-        // Reset every 5 spawns
-        if (spawnCounter >= 5)
+        else
         {
-            spawnCounter = 0;
-            dynamicCount = 0;
+            spawnX = lastX + horizontalDistance;
+            counterPos++;
+            counterNeg = 0;
         }
     }
+    else
+    {
+        // In bounds → prefer random, but block direction if counter reached
+        if (canGoLeft && canGoRight)
+        {
+            if (Random.value < 0.5f)
+            {
+                spawnX = lastX - horizontalDistance;
+                counterNeg++;
+                counterPos = 0;
+            }
+            else
+            {
+                spawnX = lastX + horizontalDistance;
+                counterPos++;
+                counterNeg = 0;
+            }
+        }
+        else if (canGoLeft)
+        {
+            spawnX = lastX - horizontalDistance;
+            counterNeg++;
+            counterPos = 0;
+        }
+        else
+        {
+            spawnX = lastX + horizontalDistance;
+            counterPos++;
+            counterNeg = 0;
+        }
+    }
+
+    float spawnY = lastY + verticalSpacing;
+    Vector2 spawnPos = new Vector2(spawnX, spawnY);
+    Instantiate(prefab, spawnPos, Quaternion.identity);
+
+    lastX = spawnX;
+    lastY = spawnY;
+    lastIndex = index;
+}
 
     // Randomly choose a platform index, respecting limits for dynamic platforms
     int SelectPlatformIndex()
     {
-        bool allowDynamic = dynamicCount < 2;
+        bool allowDynamic = dynamicCount < 2; // max 2 dynamic platforms in 5 spawns
 
         while (true)
         {
@@ -143,7 +175,8 @@ public class PlatformSpawner : MonoBehaviour
         Transform a = prefab.transform.Find(aName);
         Transform b = prefab.transform.Find(bName);
         if (a != null && b != null)
-            return Mathf.Abs(b.localPosition.x - a.localPosition.x) / 2f;
+            return Mathf.Abs(b.localPosition.x - a.localPosition.x) / 2f; // Dividing by 2 for half-width of field, because platforms are centered (0,0)
+        // If no movement reference, return 0
         return 0f;
     }
 
