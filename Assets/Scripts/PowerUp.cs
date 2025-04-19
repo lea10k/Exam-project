@@ -21,7 +21,8 @@ public class PowerUp : MonoBehaviour
 
     void Pickup(Collider2D player){
          // 1) Spawn effect
-        Instantiate(pickupEffect, transform.position, transform.rotation);
+        GameObject effect = Instantiate(pickupEffect, transform.position, transform.rotation);
+        Destroy(effect, 0.25f);
 
         // 2) Fetch the player's Movement component
         var movement = player.GetComponent<PlayerMovement>();
