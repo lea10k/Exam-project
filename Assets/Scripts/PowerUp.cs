@@ -31,15 +31,15 @@ public class PowerUp : MonoBehaviour
             switch (powerUpType)
             {
                 /*case PowerUpType.Trampoline:
-                    //movement.EnableTrampoline();   // you’ll need to add this
+                    //movement.EnableTrampoline();   
                     break;
 
                 case PowerUpType.Wings:
-                    //movement.EnableWings();        // and this
+                    //movement.EnableWings();        
                     break; */
 
                 case PowerUpType.DoubleJump:
-                    movement.EnableDoubleJump();   // already implemented
+                    movement.EnableDoubleJump();   
                     break;
 
                 default:

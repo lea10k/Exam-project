@@ -74,9 +74,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Returns true if the groundCheck point overlaps the groundLayer.
-    /// </summary>
+    // Returns true if the groundCheck point overlaps the groundLayer.
     public bool IsGrounded()
     {
         // Check overlap with ground layers or if standing on a platform
@@ -95,9 +93,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Switches the player's jump behavior to double jump.
-    /// </summary>
+    // Switches the player's jump behavior to double jump.
     public void EnableDoubleJump()
     {
         _jumpBehaviour = new DoubleJump(this);
