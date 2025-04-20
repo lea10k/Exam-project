@@ -98,4 +98,9 @@ public class PlayerMovement : MonoBehaviour
     {
         _jumpBehaviour = new DoubleJump(this);
     }
+
+    public void DisableDoubleJump()
+    {
+        _jumpBehaviour = new SingleJump(this);
+    }
 }
