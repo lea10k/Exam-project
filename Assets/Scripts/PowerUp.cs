@@ -32,6 +32,7 @@ public class PowerUp : MonoBehaviour
         // 2) Fetch the player's Movement component
         var movement = player.GetComponent<PlayerMovement>();
         var trampoline = player.GetComponent<TrampolineJump>();
+        var wings = player.GetComponent<Wings>();
         
         if (movement != null)
         {
@@ -51,9 +52,15 @@ public class PowerUp : MonoBehaviour
                     Debug.Log("player jumps " + jumpHeight);
                     break;
 
-                /*case PowerUpType.Wings:
-                    //movement.EnableWings();        
-                    break; */
+                case PowerUpType.Wings:
+                    GameObject effect2 = Instantiate(pickupEffect, transform.position, transform.rotation);
+                    Destroy(effect2, 0.25f);
+
+                    wings = player.gameObject.AddComponent<Wings>();
+                    wings.Initialize(movement);
+                
+                    wings.Fly(duration);
+                    break;   
 
                 case PowerUpType.DoubleJump:
                      // 1) Spawn effect
