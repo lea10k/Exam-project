@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8196377350877094588}
   - component: {fileID: 5417875646355765992}
   m_Layer: 0
-  m_Name: Star Power Up
+  m_Name: Double Jump Power Up
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -100,5 +100,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4b7f44b11e437b46a4badaebda83bc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  duration: 5
+  doubleJumpActive: 0
+  jumpHeight: 20
   powerUpType: 0
   pickupEffect: {fileID: 0}
