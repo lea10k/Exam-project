@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class FallingPlatform : MonoBehaviour
 {
+    [SerializeField] private GameObject platformPrefab;
     [SerializeField] private float fallDelay = 1f;
     [SerializeField] private float destroyDelay = 2f;
 
@@ -31,14 +32,26 @@ public class FallingPlatform : MonoBehaviour
     }
 
     private IEnumerator StartFall()
-    {
-        falling = true;
+{
+    falling = true;
 
-        // wait for fallDelay seconds then continue => fall after fallDelay seconds
-        yield return new WaitForSeconds(fallDelay); 
+    yield return new WaitForSeconds(fallDelay);
+    rb.bodyType = RigidbodyType2D.Dynamic;
 
-        rb.bodyType = RigidbodyType2D.Dynamic;
+    // Remember position before destroying
+    Vector2 spawnPos = transform.position;
 
-        Destroy(gameObject, destroyDelay); // Destroy platform 
-    }
+    yield return new WaitForSeconds(destroyDelay);
+    Destroy(gameObject); // Destroy platform
+
+    // Create a temporary helper to handle delayed respawn
+    GameObject respawner = new GameObject("PlatformRespawner");
+    PlatformRespawner pr = respawner.AddComponent<PlatformRespawner>();
+    
+    pr.platformPrefab = platformPrefab;
+    pr.respawnPosition = spawnPos;
+    pr.delay = timeToReloadPlatform;
+    pr.StartRespawn();
+}
+
 }

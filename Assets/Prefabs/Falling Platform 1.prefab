@@ -10,12 +10,12 @@ GameObject:
   m_Component:
   - component: {fileID: 6414768655270105629}
   - component: {fileID: 7710777662520858539}
-  - component: {fileID: 4557848141620884909}
+  - component: {fileID: 4935499643407561390}
   - component: {fileID: 5426876196374753256}
   - component: {fileID: 3347180883482539757}
   - component: {fileID: 5509912376581377428}
   m_Layer: 6
-  m_Name: Falling Platform
+  m_Name: Falling Platform 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -91,7 +91,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &4557848141620884909
+--- !u!114 &4935499643407561390
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -103,9 +103,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c63b522c3f073ef4e8f0abb114ba8be6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platformPrefab: {fileID: 1275611628323592775, guid: 1de9aa2b733103944aa58967d014731a, type: 3}
+  platformPrefab: {fileID: 1275611628323592775, guid: 610d6dc4e403a0c4dabe1901c9c1a3cd, type: 3}
   fallDelay: 4
-  destroyDelay: 4
+  destroyDelay: 2
   timeToReloadPlatform: 2
 --- !u!61 &5426876196374753256
 BoxCollider2D:
@@ -141,7 +141,7 @@ BoxCollider2D:
   m_UsedByEffector: 1
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.009897172, y: 0.38599288}
+  m_Offset: {x: 0.014513493, y: 0.38896498}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -151,7 +151,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 3.7863703, y: 0.2016213}
+  m_Size: {x: 3.7904277, y: 0.2220704}
   m_EdgeRadius: 0
 --- !u!50 &3347180883482539757
 Rigidbody2D:
