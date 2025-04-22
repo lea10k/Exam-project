@@ -29,18 +29,18 @@ public class PowerUp : MonoBehaviour
     [System.Obsolete]
     IEnumerator Pickup(Collider2D player){
     
-        // 2) Fetch the player's Movement component
+        // Fetch the player's Movement component
         var movement = player.GetComponent<PlayerMovement>();
         var trampoline = player.GetComponent<TrampolineJump>();
         var wings = player.GetComponent<Wings>();
         
         if (movement != null)
         {
-            // 3) Apply the right power-up
+            // Apply the right power-up
             switch (powerUpType)
             {
                 case PowerUpType.Trampoline:
-                     // 1) Spawn effect
+                     // Spawn effect but rotate it upwards
                     GameObject effect1 = Instantiate(pickupEffect, transform.position, Quaternion.Euler(0, 0, 90));
                     // Destroy effect after animation => unless, its last frame stays on the screen 
                     Destroy(effect1, 0.317f);
@@ -58,14 +58,12 @@ public class PowerUp : MonoBehaviour
 
                     wings = player.gameObject.AddComponent<Wings>();
                     wings.Initialize(movement);
-                
                     wings.Fly(duration);
                     break;   
 
                 case PowerUpType.DoubleJump:
-                     // 1) Spawn effect
                     GameObject effect3 = Instantiate(pickupEffect, transform.position, transform.rotation);
-                    // Destroy effect after animation => unless, its last frame stays on the screen 
+
                     Destroy(effect3, 0.25f);
 
                     movement.EnableDoubleJump();
@@ -92,7 +90,7 @@ public class PowerUp : MonoBehaviour
             Debug.LogError("Player is missing Movement component!");
         }
 
-        // 4) Destroy the power-up
+        // Destroy the power-up
         Destroy(gameObject);
     }
 }

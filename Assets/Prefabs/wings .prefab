@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 5653596441714208213}
   - component: {fileID: 760723962944837274}
-  - component: {fileID: 973713181276037530}
   - component: {fileID: 4931583957419282409}
+  - component: {fileID: 973713181276037530}
   m_Layer: 0
   m_Name: 'wings '
   m_TagString: Untagged
@@ -78,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: fdcc98b0901690a468c9b348304b239d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8125d5535f6a0324eb41c99f66736f99, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -89,6 +89,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &4931583957419282409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6396569917881694936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4b7f44b11e437b46a4badaebda83bc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 5
+  doubleJumpActive: 0
+  jumpHeight: 20
+  powerUpType: 1
+  pickupEffect: {fileID: 4627907310784502746, guid: 6d944db759de8ac44a88de33c5a47176, type: 3}
 --- !u!61 &973713181276037530
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -127,7 +144,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 17.0625, y: 9.4375}
+    oldSize: {x: 17.4375, y: 8.9375}
     newSize: {x: 17.0625, y: 9.4375}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -135,20 +152,3 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 17.0625, y: 9.4375}
   m_EdgeRadius: 0
---- !u!114 &4931583957419282409
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6396569917881694936}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4b7f44b11e437b46a4badaebda83bc8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  duration: 5
-  doubleJumpActive: 0
-  jumpHeight: 20
-  powerUpType: 1
-  pickupEffect: {fileID: 4627907310784502746, guid: 6d944db759de8ac44a88de33c5a47176, type: 3}
