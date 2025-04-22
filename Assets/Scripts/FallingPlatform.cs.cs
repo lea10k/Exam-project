@@ -6,32 +6,27 @@ public class FallingPlatform : MonoBehaviour
     [SerializeField] private float fallDelay = 1f;
     [SerializeField] private float destroyDelay = 2f;
 
+    public float timeToReloadPlatform = 2f;
+
     private bool falling = false;
-    private Rigidbody2D rb;
+    private Rigidbody2D rb; // Rb of platform
+
 
     private void Awake()
     {
-        // Suche Rigidbody2D am aktuellen Objekt oder einem Kind
+        // Get rb of current platform
         rb = GetComponent<Rigidbody2D>();
-
-        if (rb == null)
-        {
-            rb = GetComponentInChildren<Rigidbody2D>();
-        }
-
-        if (rb == null)
-        {
-            Debug.LogError("Kein Rigidbody2D gefunden für FallingPlatform an: " + gameObject.name);
-        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (falling) return;
+        if (falling == true) return;
 
+        // If player collides with platform
         if (collision.transform.CompareTag("Player"))
         {
-            StartCoroutine(StartFall());
+            // startCoroutine means here: start StartFall() now, but execute it partly on multiple frames
+            StartCoroutine(StartFall()); 
         }
     }
 
@@ -39,13 +34,11 @@ public class FallingPlatform : MonoBehaviour
     {
         falling = true;
 
-        yield return new WaitForSeconds(fallDelay);
+        // wait for fallDelay seconds then continue => fall after fallDelay seconds
+        yield return new WaitForSeconds(fallDelay); 
 
-        if (rb != null)
-        {
-            rb.bodyType = RigidbodyType2D.Dynamic;
-        }
+        rb.bodyType = RigidbodyType2D.Dynamic;
 
-        Destroy(gameObject, destroyDelay);
+        Destroy(gameObject, destroyDelay); // Destroy platform 
     }
 }
