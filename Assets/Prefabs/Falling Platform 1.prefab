@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 5509912376581377428}
   - component: {fileID: 4557848141620884909}
   m_Layer: 6
-  m_Name: Falling Platform
+  m_Name: Falling Platform 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -195,7 +195,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c63b522c3f073ef4e8f0abb114ba8be6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platformPrefab: {fileID: 1275611628323592775, guid: 53ea9d25ffc46bd48a536e582b9e0473, type: 3}
+  platformPrefab: {fileID: 1275611628323592775, guid: 610d6dc4e403a0c4dabe1901c9c1a3cd, type: 3}
   fallDelay: 5
   destroyDelay: 5
   timeToReloadPlatform: 2
