@@ -48,23 +48,32 @@ public class PlatformSpawner : MonoBehaviour
     int spawnCount = 0; // Total platforms spawned
     int fallingCount = 0; // Counts falling platforms in current group
 
+    bool wasMovingPlatform = false;
     void GeneratePlatform()
     {
         int index; // Will store selected platform type index
 
-        // Every 5th platform: allow dynamic moving platforms
-        if (spawnCount > 0 && spawnCount % 5 == 0)
-        {
-            // Choose randomly between horizontal movers (index 3,4) or vertical mover (5)
-            int[] dynamicOptions = { 3, 4, 5 };
-            index = dynamicOptions[Random.Range(0, dynamicOptions.Length)];
+        if(wasMovingPlatform == true){
+            index = 0;
+            wasMovingPlatform = false;
+        } else {
+                // Every 5th platform: allow dynamic moving platforms
+            if (spawnCount > 0 && spawnCount % 5 == 0)
+            {
+                // Choose randomly between horizontal movers (index 3,4) or vertical mover (5)
+                int[] dynamicOptions = { 3, 4, 5 };
+                index = dynamicOptions[Random.Range(0, dynamicOptions.Length)];
+            } else {
+                // For normal platforms, choose between static (0), disappearing (1), and falling (2)
+                // Only allow falling platforms if we haven't exceeded limit (fallingCount < 1)
+                int[] normalOptions = (fallingCount < 1) ? new int[] { 0, 1, 2 } : new int[] { 0, 1 };
+                index = normalOptions[Random.Range(0, normalOptions.Length)];
+            }
         }
-        else
+
+        if (index >= 3 && index <= 5)
         {
-            // For normal platforms, choose between static (0), disappearing (1), and falling (2)
-            // Only allow falling platforms if we haven't exceeded limit (fallingCount < 1)
-            int[] normalOptions = (fallingCount < 1) ? new int[] { 0, 1, 2 } : new int[] { 0, 1 };
-            index = normalOptions[Random.Range(0, normalOptions.Length)];
+            wasMovingPlatform = true;
         }
 
         // Increment falling platform counter if we spawned one
