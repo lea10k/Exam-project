@@ -1,34 +1,31 @@
-// PlatformSpawner.cs
-// Spawns random platforms for an endless vertical 2D platformer game
-
 using UnityEngine;
 
 public class PlatformSpawner : MonoBehaviour
 {
     [Header("Prefabs")]
-    [Tooltip("Array of platform prefabs (0 = static, 1 = disappearing, 2 = falling, 3-5 = moving)")]
+    [Tooltip("Array of platform prefabs (0 = static, 1 = disappearing, 2 = falling, 3-4 = moving)")]
     public GameObject[] platformPrefabs;
 
     [Header("Playfield")]
     public Transform player;
-    [Tooltip("Gesamte Spielfeldbreite")]
+    [Tooltip("Total playfield width")]
     public float playfieldWidth = 26f;
-    [Tooltip("Maximaler horizontaler Bewegungsbereich (von -maxPath bis +maxPath)")]
-    public float maxPath = 12f; 
-    [Tooltip("Automatisch die Breite der Plattform ermitteln? (Empfohlen)")]
-    public bool autoDetectPlatformWidth = true;
-    [Tooltip("Manuelle Plattformbreite (nur verwendet wenn autoDetect = false)")]
-    public float manualPlatformWidth = 3f;
+    [Tooltip("Maximum horizontal movement range (between -maxPath and +maxPath)")]
+    public float maxPath = 11f; 
+    
+    [Tooltip("Manual Platform width only used if autoDetect = false")]
+    public float manualPlatformWidth = 4.4f;
 
     [Header("Spacing Rules")]
     public float verticalSpacing = 2.5f;
-    public float horizontalDistance = 3f;
+    [Tooltip("Horizontal distance to last spawned and new spawned platform")]
+    public float horizontalDistance = 2f;
 
     [Header("Generation Settings")]
     [Tooltip("How far ahead of player to generate platforms")]
     public float generationLookAhead = 10f;
     [Tooltip("Maximum consecutive platforms in same direction")]
-    public int maxConsecutiveDirections = 3;
+    public int maxConsecutiveDirections = 4;
 
     [Header("Monster Settings")]
     [Tooltip("Monster prefabs (0 = Shark, 1 = GreenSlime)")]
@@ -50,9 +47,8 @@ public class PlatformSpawner : MonoBehaviour
         Static = 0,
         Disappearing = 1,
         Falling = 2,
-        MovingHorizontalRight = 3,
-        MovingHorizontalLeft = 4,
-        MovingVertical = 5
+        MovingHorizontal = 3,
+        MovingVertical = 4
     }
 
     // Internal tracking variables
@@ -63,6 +59,7 @@ public class PlatformSpawner : MonoBehaviour
     private int consecutiveRightMoves = 0;
     private int totalPlatformsSpawned = 0;
     private int fallingPlatformsInGroup = 0;
+    private bool wasLastPlatformVertical = false; 
     private float platformWidth;
 
     void Start()
@@ -82,50 +79,18 @@ public class PlatformSpawner : MonoBehaviour
 
     private void InitializePlatformWidth()
     {
-        if (autoDetectPlatformWidth && platformPrefabs.Length > 0)
+        // Try to detect platform width from the first platform prefab
+        Renderer renderer = platformPrefabs[0].GetComponent<Renderer>();
+        if (renderer != null)
         {
-            // Try to detect platform width from the first platform prefab
-            Renderer renderer = platformPrefabs[0].GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                // Get width from the renderer's bounds
-                platformWidth = renderer.bounds.size.x;
-                Debug.Log($"Auto-detected platform width: {platformWidth}");
-            }
-            else
-            {
-                // Try to find width from any SpriteRenderer or MeshRenderer in children
-                Renderer[] renderers = platformPrefabs[0].GetComponentsInChildren<Renderer>();
-                if (renderers.Length > 0)
-                {
-                    float maxWidth = 0f;
-                    foreach (Renderer r in renderers)
-                    {
-                        if (r.bounds.size.x > maxWidth)
-                            maxWidth = r.bounds.size.x;
-                    }
-                    platformWidth = maxWidth;
-                    Debug.Log($"Auto-detected platform width from children: {platformWidth}");
-                }
-                else
-                {
-                    // Fallback to manual width
-                    platformWidth = manualPlatformWidth;
-                    Debug.LogWarning($"Could not detect platform width. Using manual value: {platformWidth}");
-                }
-            }
-        }
+            // Get width from the renderer's bounds
+            platformWidth = renderer.bounds.size.x;
+            Debug.Log($"Auto-detected platform width: {platformWidth}");
+        } 
         else
         {
             // Use the manual platform width
             platformWidth = manualPlatformWidth;
-        }
-        
-        // Ensure we have a minimum width to avoid division by zero
-        if (platformWidth <= 0.1f)
-        {
-            platformWidth = 1f;
-            Debug.LogWarning("Platform width too small. Using default value: 1");
         }
     }
 
@@ -137,26 +102,13 @@ public class PlatformSpawner : MonoBehaviour
         if (maxPath > halfPlayfieldWidth)
         {
             Debug.LogWarning($"maxPath ({maxPath}) exceeds half of playfield width ({halfPlayfieldWidth}). Adjusting to fit.");
-            maxPath = halfPlayfieldWidth;
-        }
-        
-        // Ensure maxPath accommodates platform width
-        float requiredSpace = platformWidth / 2;
-        if (maxPath + requiredSpace > halfPlayfieldWidth)
+            float distanceOfFieldEndToMaxPath = 2;
+            maxPath = halfPlayfieldWidth - distanceOfFieldEndToMaxPath;
+        } 
+        else
         {
-            float newMaxPath = halfPlayfieldWidth - requiredSpace;
-            Debug.LogWarning($"Reducing maxPath to {newMaxPath} to ensure platforms don't extend beyond playfield.");
-            maxPath = newMaxPath;
+            Debug.LogWarning($"maxPath is ({maxPath})");
         }
-        
-        // Make sure we have enough horizontal distance for movement
-        if (horizontalDistance > maxPath)
-        {
-            Debug.LogWarning($"horizontalDistance ({horizontalDistance}) is greater than maxPath ({maxPath}). Adjusting horizontalDistance.");
-            horizontalDistance = maxPath * 0.75f;
-        }
-        
-        Debug.Log($"Using maxPath: {maxPath}, effective platform movement range: -{maxPath} to +{maxPath}");
     }
 
     void Update()
@@ -220,8 +172,7 @@ public class PlatformSpawner : MonoBehaviour
         {
             // Choose randomly between horizontal movers or vertical mover
             int[] movingOptions = { 
-                (int)PlatformType.MovingHorizontalRight, 
-                (int)PlatformType.MovingHorizontalLeft, 
+                (int)PlatformType.MovingHorizontal, 
                 (int)PlatformType.MovingVertical 
             };
             
@@ -232,6 +183,7 @@ public class PlatformSpawner : MonoBehaviour
             // For normal platforms, choose between static, disappearing, and falling
             bool canSpawnFalling = fallingPlatformsInGroup < 1;
             
+            // Don't want to have too many falling platforms too reduce bugs and irritations of the player
             if (canSpawnFalling)
             {
                 // Can spawn any normal platform type
@@ -249,10 +201,18 @@ public class PlatformSpawner : MonoBehaviour
     {
         // Calculate horizontal position based on movement constraints
         float spawnX = CalculateHorizontalPosition();
+        float verticalSpaceFromPosB = 1f;
+        float spawnY;
         
         // Calculate vertical position (always above last platform)
-        float spawnY = lastSpawnedY + verticalSpacing;
-        
+        if (wasLastPlatformVertical)
+        {
+            spawnY = lastSpawnedY + verticalSpacing + verticalSpaceFromPosB;
+        }
+        else
+        {
+            spawnY = lastSpawnedY + verticalSpacing;
+        }
         // Apply platform-specific position adjustments
         Vector2 spawnPosition = AdjustPositionForPlatformType(platformIndex, spawnX, spawnY);
         
@@ -262,69 +222,72 @@ public class PlatformSpawner : MonoBehaviour
     private float CalculateHorizontalPosition()
     {
         float nextX = lastSpawnedX;
+
+        // Determine a limit of right or left spawning platforms
         bool canMoveLeft = consecutiveLeftMoves < maxConsecutiveDirections;
         bool canMoveRight = consecutiveRightMoves < maxConsecutiveDirections;
+
+        // Computes edge boundaries from maxPath to platformwidth / 2
+        float edgeBuffer = platformWidth / 2;
+        float leftBoundary = -maxPath + edgeBuffer;
+        float rightBoundary = maxPath - edgeBuffer;
         
-        // Safe distance from edge (to avoid issues with moving platforms)
-        float safeDistance = horizontalDistance * 0.5f;
-        
-        // Handle boundary constraints
-        if (lastSpawnedX >= maxPath - safeDistance)
+        // Treat edge cases 
+        if (lastSpawnedX >= rightBoundary)
         {
-            // At or approaching right edge, must move left
+            // At right edge -> move to the left
             nextX = lastSpawnedX - horizontalDistance;
             consecutiveLeftMoves++;
             consecutiveRightMoves = 0;
         }
-        else if (lastSpawnedX <= -maxPath + safeDistance)
+        else if (lastSpawnedX <= leftBoundary)
         {
-            // At or approaching left edge, must move right
+            // At left edge -> move to the right
             nextX = lastSpawnedX + horizontalDistance;
             consecutiveRightMoves++;
             consecutiveLeftMoves = 0;
         }
         else
         {
-            // Not at edge, determine direction based on constraints
+            // Normal movement logic
             if (canMoveLeft && canMoveRight)
             {
-                // Can go either way - random choice
                 bool goRight = Random.value < 0.5f;
+
                 nextX = goRight ? 
                     lastSpawnedX + horizontalDistance : 
                     lastSpawnedX - horizontalDistance;
                 
-                if (goRight)
-                {
-                    consecutiveRightMoves++;
-                    consecutiveLeftMoves = 0;
+                if (goRight) 
+                { 
+                    consecutiveRightMoves++; 
+                    consecutiveLeftMoves = 0; 
                 }
-                else
-                {
-                    consecutiveLeftMoves++;
-                    consecutiveRightMoves = 0;
+                else 
+                { 
+                    consecutiveLeftMoves++; 
+                    consecutiveRightMoves = 0; 
                 }
             }
             else if (canMoveLeft)
             {
-                // Only left allowed
                 nextX = lastSpawnedX - horizontalDistance;
                 consecutiveLeftMoves++;
                 consecutiveRightMoves = 0;
             }
             else
             {
-                // Only right allowed
                 nextX = lastSpawnedX + horizontalDistance;
                 consecutiveRightMoves++;
                 consecutiveLeftMoves = 0;
             }
         }
         
-        // Clamp to ensure we stay within boundaries
-        nextX = Mathf.Clamp(nextX, -maxPath, maxPath);
-        
-        return nextX;
+        // Final limitation
+        // if nextX < leftBoundary --> leftBoundary
+        // if nextX > rightBoundary --> rightBoundary
+        // Otherwise nextX keeps unaltered 
+        return Mathf.Clamp(nextX, leftBoundary, rightBoundary);
     }
     
     private Vector2 AdjustPositionForPlatformType(int platformIndex, float x, float y)
@@ -332,36 +295,38 @@ public class PlatformSpawner : MonoBehaviour
         float adjustedX = x;
         float adjustedY = y;
         
-        // Calculate safe offsets that won't push platform outside boundaries
-        float maxRightOffset = (playfieldWidth / 2) - adjustedX - platformWidth/2;
-        float maxLeftOffset = adjustedX - (-playfieldWidth / 2 + platformWidth/2);
+        // Computes edge boundaries from maxPath to platformwidth / 2
+        float edgeBuffer = platformWidth / 2;
+        float leftBoundary = -maxPath + edgeBuffer;
+        float rightBoundary = maxPath - edgeBuffer;
         
-        // Apply platform-specific position adjustments
+        // Movement range for horizontally moving platforms 
+        const float movementRange = 3f;
+        
         switch (platformIndex)
         {
-            case (int)PlatformType.MovingHorizontalRight:
-                // Use a smaller offset for moving platforms to keep them in bounds during movement
-                float rightOffset = Mathf.Min(2f, maxRightOffset * 0.5f);
-                if (rightOffset > 0)
-                    adjustedX += rightOffset;
-                break;
-                
-            case (int)PlatformType.MovingHorizontalLeft:
-                float leftOffset = Mathf.Min(2f, maxLeftOffset * 0.5f);
-                if (leftOffset > 0)
-                    adjustedX -= leftOffset;
-                break;
-                
+            case (int)PlatformType.MovingHorizontal:
+                // Ensure possible movement to the right (+3)
+                if ((adjustedX + movementRange) > rightBoundary)
+                {
+                    adjustedX = rightBoundary - movementRange;
+                }
+                // Ensure possible movement to the left (-3)
+                else if ((adjustedX - movementRange) < leftBoundary)
+                {
+                    adjustedX = leftBoundary + movementRange;
+                }
+                break;  
             case (int)PlatformType.MovingVertical:
-                adjustedY += 1f; // Start slightly higher
+                adjustedY += 1f; // Start slightly raised 
                 break;
         }
         
-        // One final check to make sure we're within the actual playfield
-        float halfPlayfieldWidth = playfieldWidth / 2;
-        adjustedX = Mathf.Clamp(adjustedX, -halfPlayfieldWidth + platformWidth/2, halfPlayfieldWidth - platformWidth/2);
-        
-        return new Vector2(adjustedX, adjustedY);
+        // Final positioning 
+        return new Vector2(
+            Mathf.Clamp(adjustedX, leftBoundary, rightBoundary),
+            adjustedY
+        );
     }
     
     private void UpdateTrackingVariables(int platformIndex, Vector2 spawnPosition)
@@ -372,6 +337,7 @@ public class PlatformSpawner : MonoBehaviour
         
         // Update platform type tracking
         wasLastPlatformMoving = IsMovingPlatform(platformIndex);
+        wasLastPlatformVertical = platformIndex == (int)PlatformType.MovingVertical;
         
         // Update falling platform counter
         if (platformIndex == (int)PlatformType.Falling)
@@ -390,7 +356,7 @@ public class PlatformSpawner : MonoBehaviour
     private bool IsMovingPlatform(int platformIndex)
     {
         // Check if platform is any of the moving types
-        return platformIndex >= (int)PlatformType.MovingHorizontalRight && 
+        return platformIndex >= (int)PlatformType.MovingHorizontal && 
                platformIndex <= (int)PlatformType.MovingVertical;
     }
 
@@ -442,7 +408,7 @@ public class PlatformSpawner : MonoBehaviour
         
         // maxPath boundaries
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(new Vector3(maxPath, -5f, 0), new Vector3(maxPath, 5f, 0));
-        Gizmos.DrawLine(new Vector3(-maxPath, -5f, 0), new Vector3(-maxPath, 5f, 0));
+        Gizmos.DrawLine(new Vector3(maxPath, -5f, 0), new Vector3(maxPath, height, 0));
+        Gizmos.DrawLine(new Vector3(-maxPath, -5f, 0), new Vector3(-maxPath, height, 0));
     }
 }

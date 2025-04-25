@@ -102,7 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddf99ee23b7a15440a4924f658a385b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeToTogglePlatform: 2
+  timeToTogglePlatform: 2.5
 --- !u!61 &6631178254319536215
 BoxCollider2D:
   m_ObjectHideFlags: 0
