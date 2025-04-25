@@ -83,12 +83,18 @@ public class PowerUp : MonoBehaviour
                 case PowerUpType.Life:
                     GameObject effect4 = Instantiate(pickupEffect, transform.position, transform.rotation);
                     Destroy(effect4, 0.233f);
-                    
-                    lives = player.gameObject.AddComponent<LivesPowerUp>();
 
-                    amountOfLives = lives.ComputeLives(amountOfLives);
-                    Debug.Log("Invoked function");
-                
+                    // Fetch the PlayerHealth component and heal the player
+                    var playerHealth = player.GetComponent<PlayerHealth>();
+                    if (playerHealth != null)
+                    {
+                        playerHealth.Heal(amountOfLives);
+                        Debug.Log($"Healed the player by {amountOfLives} life/lives.");
+                    }
+                    else
+                    {
+                        Debug.LogError("Player is missing PlayerHealth component!");
+                    }
                     break;
 
                 case PowerUpType.nothing:
@@ -108,5 +114,5 @@ public class PowerUp : MonoBehaviour
         //Destroy(gameObject);
     }
 }
-       
+
 
