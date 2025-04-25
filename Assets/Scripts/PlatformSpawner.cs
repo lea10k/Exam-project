@@ -30,6 +30,20 @@ public class PlatformSpawner : MonoBehaviour
     [Tooltip("Maximum consecutive platforms in same direction")]
     public int maxConsecutiveDirections = 3;
 
+    [Header("Monster Settings")]
+    [Tooltip("Monster prefabs (0 = Shark, 1 = GreenSlime)")]
+    public GameObject[] monsterPrefabs;
+    [Tooltip("Chance to spawn a monster on a static platform (0 to 1)")]
+    [Range(0f, 1f)]
+    public float monsterSpawnChance = 0.3f;
+
+    [Header("Power-Up Settings")]
+    [Tooltip("Power-up prefabs")]
+    public GameObject[] powerUpPrefabs;
+    [Tooltip("Chance to spawn a power-up on a static platform (0 to 1)")]
+    [Range(0f, 1f)]
+    public float powerUpSpawnChance = 0.2f;
+
     // Platform type constants for better readability
     private enum PlatformType
     {
@@ -180,9 +194,15 @@ public class PlatformSpawner : MonoBehaviour
         Vector2 spawnPosition = CalculateSpawnPosition(platformIndex);
         
         // Step 3: Create the platform
-        Instantiate(platformPrefabs[platformIndex], spawnPosition, Quaternion.identity);
+        GameObject platform = Instantiate(platformPrefabs[platformIndex], spawnPosition, Quaternion.identity);
         
-        // Step 4: Update tracking variables
+        // Step 4: Spawn monster or power-up if platform is static
+        if (platformIndex == (int)PlatformType.Static)
+        {
+            TrySpawnMonsterOrPowerUp(spawnPosition, platform);
+        }
+        
+        // Step 5: Update tracking variables
         UpdateTrackingVariables(platformIndex, spawnPosition);
     }
 
@@ -372,6 +392,31 @@ public class PlatformSpawner : MonoBehaviour
         // Check if platform is any of the moving types
         return platformIndex >= (int)PlatformType.MovingHorizontalRight && 
                platformIndex <= (int)PlatformType.MovingVertical;
+    }
+
+    private void TrySpawnMonsterOrPowerUp(Vector2 platformPosition, GameObject platform)
+    {
+        // Ensure monsterPrefabs and powerUpPrefabs arrays are not null or empty
+        bool canSpawnMonster = monsterPrefabs != null && monsterPrefabs.Length > 0;
+        bool canSpawnPowerUp = powerUpPrefabs != null && powerUpPrefabs.Length > 0;
+
+        // Decide whether to spawn a monster, a power-up, or nothing
+        float randomValue = Random.value;
+
+        if (canSpawnMonster && randomValue <= monsterSpawnChance)
+        {
+            // Spawn a monster
+            GameObject monsterPrefab = monsterPrefabs[Random.Range(0, monsterPrefabs.Length)];
+            Vector2 monsterPosition = new Vector2(platformPosition.x, platformPosition.y + 0.3f);
+            Instantiate(monsterPrefab, monsterPosition, Quaternion.identity, platform.transform);
+        }
+        else if (canSpawnPowerUp && randomValue <= (monsterSpawnChance + powerUpSpawnChance))
+        {
+            // Spawn a power-up 5 units higher than the platform
+            GameObject powerUpPrefab = powerUpPrefabs[Random.Range(0, powerUpPrefabs.Length)];
+            Vector2 powerUpPosition = new Vector2(platformPosition.x, platformPosition.y + 1f);
+            Instantiate(powerUpPrefab, powerUpPosition, Quaternion.identity, platform.transform);
+        }
     }
 
     // For debugging
