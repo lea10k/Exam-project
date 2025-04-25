@@ -6,11 +6,13 @@ public class PowerUp : MonoBehaviour
     public float duration = 5f; // duration of (double jump) power up
     public bool doubleJumpActive = false; // Variable just to check if double jump is activated in the inspector
     public float jumpHeight = 20f;
+    public int amountOfLives = 1;
     public enum PowerUpType 
     { 
         Trampoline, 
         Wings, 
         DoubleJump,
+        Life,
         nothing
     } 
     public PowerUpType powerUpType;     // Type of power-up
@@ -33,6 +35,7 @@ public class PowerUp : MonoBehaviour
         var movement = player.GetComponent<PlayerMovement>();
         var trampoline = player.GetComponent<TrampolineJump>();
         var wings = player.GetComponent<Wings>();
+        var lives = player.GetComponent<LivesPowerUp>();
         
         if (movement != null)
         {
@@ -77,6 +80,17 @@ public class PowerUp : MonoBehaviour
                     movement.DisableDoubleJump();
                     break;
 
+                case PowerUpType.Life:
+                    GameObject effect4 = Instantiate(pickupEffect, transform.position, transform.rotation);
+                    Destroy(effect4, 0.233f);
+                    
+                    lives = player.gameObject.AddComponent<LivesPowerUp>();
+
+                    amountOfLives = lives.ComputeLives(amountOfLives);
+                    Debug.Log("Invoked function");
+                
+                    break;
+
                 case PowerUpType.nothing:
                     break;
 
@@ -91,7 +105,7 @@ public class PowerUp : MonoBehaviour
         }
 
         // Destroy the power-up
-        Destroy(gameObject);
+        //Destroy(gameObject);
     }
 }
        
