@@ -10,10 +10,12 @@ public class monsterBehavior : MonoBehaviour
     private bool isPaused = false; // Whether the monster is paused
     private Animator animator; // Reference to the Animator component
     private bool isAttacking = false; // Whether the monster is attacking
+    private Collider2D[] monsterColliders; // Array to hold all Collider2D components
 
     void Start()
     {
         animator = GetComponent<Animator>();
+        monsterColliders = GetComponents<Collider2D>(); // Get all Collider2D components
     }
 
     void Update()
@@ -55,8 +57,18 @@ public class monsterBehavior : MonoBehaviour
             isAttacking = true;
             animator.SetTrigger("attack");
 
-            // Trigger game over
-            FindObjectOfType<GameOverManager>().TriggerGameOver(); // Replace 100 with the actual score
+            // Damage the player
+            PlayerHealth playerHealth = collision.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(1);
+            }
+
+            // Disable all colliders after attacking
+            foreach (var collider in monsterColliders)
+            {
+                collider.enabled = false;
+            }
         }
     }
 
