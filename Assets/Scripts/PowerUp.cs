@@ -111,7 +111,7 @@ public class PowerUp : MonoBehaviour
         }
 
         // Destroy the power-up
-        //Destroy(gameObject);
+        Destroy(gameObject);
     }
 }
 
