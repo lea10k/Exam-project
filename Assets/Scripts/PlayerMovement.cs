@@ -31,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // default to single jump behavior
         _jumpBehaviour = new SingleJump(this);
+
     }
 
     [System.Obsolete]

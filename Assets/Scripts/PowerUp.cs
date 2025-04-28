@@ -35,7 +35,6 @@ public class PowerUp : MonoBehaviour
         var movement = player.GetComponent<PlayerMovement>();
         var trampoline = player.GetComponent<TrampolineJump>();
         var wings = player.GetComponent<Wings>();
-        var lives = player.GetComponent<LivesPowerUp>();
         
         if (movement != null)
         {
