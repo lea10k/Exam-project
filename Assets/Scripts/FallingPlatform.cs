@@ -24,9 +24,12 @@ public class FallingPlatform : MonoBehaviour
         if (falling == true) return;
         if (!collision.transform.CompareTag("Player")) return;
         
-        // startCoroutine means here: start StartFall() now, but execute it partly on multiple frames 
+        // Checks if the player’s velocity relative to the platform’s velocity is zero or negative.
+        // Platform has v = 0 and player's velocity is negative, because he falls down.
+        // relativeVelocity = vplayer – vplatform
         if (collision.relativeVelocity.y <= 0f)
         {
+            // startCoroutine means here: start StartFall() now, but execute it partly on multiple frames 
             StartCoroutine(StartFall());
         }
     }
