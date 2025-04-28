@@ -101,9 +101,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4b7f44b11e437b46a4badaebda83bc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  duration: 5
-  doubleJumpActive: 0
-  jumpHeight: 20
+  doubleJumpDuration: 5
+  WingsDuration: 3
+  TrampolineJumpHeight: 40
   powerUpType: 0
   pickupEffect: {fileID: 3782588240986449528, guid: 1691642a61478aa45ae02cee5dd66b49, type: 3}
 --- !u!61 &6399330807985470062

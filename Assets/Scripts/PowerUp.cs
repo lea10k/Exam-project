@@ -3,10 +3,18 @@ using UnityEngine;
 
 public class PowerUp : MonoBehaviour
 {   
-    public float duration = 5f; // duration of (double jump) power up
-    public bool doubleJumpActive = false; // Variable just to check if double jump is activated in the inspector
-    public float jumpHeight = 20f;
-    public int amountOfLives = 1;
+    [Header("Durations")]
+    public float doubleJumpDuration = 5f; 
+    public float WingsDuration = 3f;
+
+    [Header("Height")]
+    public float TrampolineJumpHeight = 40f;
+
+    [Header("Select Power Up")]
+    public PowerUpType powerUpType;     // Type of power-up
+    public GameObject pickupEffect;     // Effect to spawn on pickup
+
+    private readonly int amountOfLives = 1;
     public enum PowerUpType 
     { 
         Trampoline, 
@@ -15,8 +23,7 @@ public class PowerUp : MonoBehaviour
         Life,
         nothing
     } 
-    public PowerUpType powerUpType;     // Type of power-up
-    public GameObject pickupEffect;     // Effect to spawn on pickup
+
 
     [System.Obsolete]
 
@@ -50,8 +57,8 @@ public class PowerUp : MonoBehaviour
                     trampoline = player.gameObject.AddComponent<TrampolineJump>();
                     trampoline.Initialize(movement);
 
-                    trampoline.Jump(jumpHeight); 
-                    Debug.Log("player jumps " + jumpHeight);
+                    trampoline.Jump(TrampolineJumpHeight); 
+                    Debug.Log("player jumps " + TrampolineJumpHeight);
                     break;
 
                 case PowerUpType.Wings:
@@ -60,7 +67,7 @@ public class PowerUp : MonoBehaviour
 
                     wings = player.gameObject.AddComponent<Wings>();
                     wings.Initialize(movement);
-                    wings.Fly(duration);
+                    wings.Fly(WingsDuration);
                     break;   
 
                 case PowerUpType.DoubleJump:
@@ -69,14 +76,15 @@ public class PowerUp : MonoBehaviour
                     Destroy(effect3, 0.25f);
 
                     movement.EnableDoubleJump();
-                    doubleJumpActive = true;
+                    Debug.Log("Double jump activated");
 
                     GetComponent<Collider2D>().enabled = false;
                     GetComponent<SpriteRenderer>().enabled = false;
 
-                    yield return new WaitForSeconds(duration);
+                    yield return new WaitForSeconds(doubleJumpDuration);
 
                     movement.DisableDoubleJump();
+                    Debug.Log("Double jump deactivated");
                     break;
 
                 case PowerUpType.Life:
@@ -85,6 +93,7 @@ public class PowerUp : MonoBehaviour
 
                     // Fetch the PlayerHealth component and heal the player
                     var playerHealth = player.GetComponent<PlayerHealth>();
+
                     if (playerHealth != null)
                     {
                         playerHealth.Heal(amountOfLives);
