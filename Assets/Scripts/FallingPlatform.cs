@@ -22,36 +22,40 @@ public class FallingPlatform : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (falling == true) return;
-
-        // If player collides with platform
-        if (collision.transform.CompareTag("Player"))
+        if (!collision.transform.CompareTag("Player")) return;
+        
+        // Checks if the player’s velocity relative to the platform’s velocity is zero or negative.
+        // Platform has v = 0 and player's velocity is negative, because he falls down.
+        // relativeVelocity = vplayer – vplatform
+        if (collision.relativeVelocity.y <= 0f)
         {
-            // startCoroutine means here: start StartFall() now, but execute it partly on multiple frames
-            StartCoroutine(StartFall()); 
+            // startCoroutine means here: start StartFall() now, but execute it partly on multiple frames 
+            StartCoroutine(StartFall());
         }
     }
 
+
     private IEnumerator StartFall()
-{
-    falling = true;
+    {
+        falling = true;
 
-    yield return new WaitForSeconds(fallDelay);
-    rb.bodyType = RigidbodyType2D.Dynamic;
+        yield return new WaitForSeconds(fallDelay);
+        rb.bodyType = RigidbodyType2D.Dynamic;
 
-    // Remember position before destroying
-    Vector2 spawnPos = transform.position;
+        // Remember position before destroying
+        Vector2 spawnPos = transform.position;
 
-    yield return new WaitForSeconds(destroyDelay);
-    Destroy(gameObject); // Destroy platform
+        yield return new WaitForSeconds(destroyDelay);
+        Destroy(gameObject); // Destroy platform
 
-    // Create a temporary helper to handle delayed respawn
-    GameObject respawner = new GameObject("PlatformRespawner");
-    PlatformRespawner pr = respawner.AddComponent<PlatformRespawner>();
-    
-    pr.platformPrefab = platformPrefab;
-    pr.respawnPosition = spawnPos;
-    pr.delay = timeToReloadPlatform;
-    pr.StartRespawn();
-}
+        // Create a temporary helper to handle delayed respawn
+        GameObject respawner = new GameObject("PlatformRespawner");
+        PlatformRespawner pr = respawner.AddComponent<PlatformRespawner>();
+        
+        pr.platformPrefab = platformPrefab;
+        pr.respawnPosition = spawnPos;
+        pr.delay = timeToReloadPlatform;
+        pr.StartRespawn();
+    }
 
 }
