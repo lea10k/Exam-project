@@ -69,6 +69,14 @@ public class monsterBehavior : MonoBehaviour
             {
                 collider.enabled = false;
             }
+
+            // Change sorting layer to "Background"
+            var spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sortingLayerName = "DeadMonster";
+                Debug.Log("Monster moved to Background layer after death.");
+            }
         }
     }
 

@@ -4,7 +4,7 @@ using TMPro;
 public class PlayerScore : MonoBehaviour
 {
     public TextMeshProUGUI scoreText;
-    private float highestY = 0f;
+    public float highestY = 0f;
 
     void Start()
     {
