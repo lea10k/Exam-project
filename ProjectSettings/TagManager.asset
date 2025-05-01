@@ -42,6 +42,9 @@ TagManager:
   - name: Background
     uniqueID: 2378778105
     locked: 0
+  - name: DeadMonster
+    uniqueID: 3558342317
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
