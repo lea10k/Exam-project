@@ -8,7 +8,7 @@ public class PowerUp : MonoBehaviour
     public float WingsDuration = 3f;
 
     [Header("Height")]
-    public float TrampolineJumpHeight = 40f;
+    public float TrampolineJumpHeight = 25f;
 
     [Header("Select Power Up")]
     public PowerUpType powerUpType;     // Type of power-up
@@ -23,10 +23,45 @@ public class PowerUp : MonoBehaviour
         Life,
         nothing
     } 
+    
 
+    void DeactivateCurrentPowerUps(GameObject player)
+    {
+        // Get all power up components 
+        Wings wings = player.GetComponent<Wings>();
+        TrampolineJump trampoline = player.GetComponent<TrampolineJump>();
+        PlayerMovement movement = player.GetComponent<PlayerMovement>();
+
+        // Deactivate wings effect if activated 
+        if (wings != null) 
+        {
+            // Reset wings effect manually, otherwise jump height won't be as determined.
+            if (movement != null && movement.Rb != null)
+            {
+                // Activate normal gravity again
+                movement.Rb.gravityScale = 4f;
+                movement.Animator.SetBool("IsJumping", false);
+            }
+            Destroy(wings);
+            Debug.Log("Wings deactivated");
+        }
+
+        // Deactivate trampoline if activated 
+        if (trampoline != null) 
+        {
+            Destroy(trampoline);
+            Debug.Log("Trampoline deactivated");
+        }
+
+        // Deactivate double jump if activated 
+        if (movement != null)
+        {
+            movement.DisableDoubleJump();
+            Debug.Log("Double jump deactivated");
+        }
+    }
 
     [System.Obsolete]
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player")){
@@ -37,11 +72,9 @@ public class PowerUp : MonoBehaviour
 
     [System.Obsolete]
     IEnumerator Pickup(Collider2D player){
-    
+        DeactivateCurrentPowerUps(player.gameObject);
         // Fetch the player's Movement component
         var movement = player.GetComponent<PlayerMovement>();
-        var trampoline = player.GetComponent<TrampolineJump>();
-        var wings = player.GetComponent<Wings>();
         
         if (movement != null)
         {
@@ -49,30 +82,29 @@ public class PowerUp : MonoBehaviour
             switch (powerUpType)
             {
                 case PowerUpType.Trampoline:
-                     // Spawn effect but rotate it upwards
+                    // Spawn effect but rotate it upwards
                     GameObject effect1 = Instantiate(pickupEffect, transform.position, Quaternion.Euler(0, 0, 90));
                     // Destroy effect after animation => unless, its last frame stays on the screen 
                     Destroy(effect1, 0.317f);
 
-                    trampoline = player.gameObject.AddComponent<TrampolineJump>();
+                    var trampoline = player.gameObject.AddComponent<TrampolineJump>();
                     trampoline.Initialize(movement);
 
                     trampoline.Jump(TrampolineJumpHeight); 
-                    Debug.Log("player jumps " + TrampolineJumpHeight);
+                    Debug.Log("player jumps " + TrampolineJumpHeight); 
                     break;
 
                 case PowerUpType.Wings:
                     GameObject effect2 = Instantiate(pickupEffect, transform.position, transform.rotation);
                     Destroy(effect2, 0.25f);
 
-                    wings = player.gameObject.AddComponent<Wings>();
+                    var wings = player.gameObject.AddComponent<Wings>();
                     wings.Initialize(movement);
                     wings.Fly(WingsDuration);
                     break;   
 
                 case PowerUpType.DoubleJump:
                     GameObject effect3 = Instantiate(pickupEffect, transform.position, transform.rotation);
-
                     Destroy(effect3, 0.25f);
 
                     movement.EnableDoubleJump();

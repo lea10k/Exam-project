@@ -4,7 +4,6 @@ public class Wings : MonoBehaviour
 {   
     // Need reference to PlayerMovement.cs in order to control player's Rb, animation etc. 
     private PlayerMovement _movement;
-    private float _flyDuration;
     private float _endTime;
     private bool _isFlying = false;
 
@@ -19,12 +18,21 @@ public class Wings : MonoBehaviour
 
     public void Fly(float duration)
     {
-        _flyDuration = duration;
         _endTime = Time.time + duration;
         _isFlying = true;
 
         _movement.Rb.gravityScale = 0f; // Activate floating mode 
         _movement.Animator.SetBool("IsJumping", true); // Activate jump animation
+    }
+
+    public void StopFlying()
+    {
+        if (_isFlying)
+        {
+            _isFlying = false;
+            _movement.Rb.gravityScale = 4f; // Activate gravity again
+            _movement.Animator.SetBool("IsJumping", false);
+        }
     }
 
     [System.Obsolete]
@@ -35,9 +43,7 @@ public class Wings : MonoBehaviour
         // What will happen when the time is over?
         if (Time.time > _endTime)
         {
-            _isFlying = false;
-            _movement.Rb.gravityScale = 4f; // Activate gravity again
-            _movement.Animator.SetBool("IsJumping", false);
+            StopFlying();
             Destroy(this); // Delete Wings.cs from player
             return;
         }
