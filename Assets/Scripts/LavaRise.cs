@@ -4,13 +4,15 @@ using UnityEngine;
 public class LavaRise : MonoBehaviour
 {
     public float baseSpeed = 0.01f; // starting speed
-    //public float growthRate = 0.1f; // how fast the speed grows
-    //public float gameOverHeight = 10f; // Height at which the game ends
     public Transform player; // Reference to the player
 
-    //private float timeElapsed = 0f;
     private PlayerHealth playerHealth;
     private PlayerScore playerScore;
+
+    // Add these lines:
+    private float pauseTimer = 0f;
+    public float pauseDuration = 0.5f; // About 30 frames at 60fps
+    private bool hasStarted = false;
 
     void Start()
     {
@@ -30,7 +32,23 @@ public class LavaRise : MonoBehaviour
 
     void Update()
     {
-        //timeElapsed += Time.deltaTime;
+        if (!hasStarted)
+        {
+            if (Input.anyKeyDown) // Or check for specific input, e.g. Input.GetButtonDown("Jump")
+            {
+                hasStarted = true;
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        if (pauseTimer > 0f)
+        {
+            pauseTimer -= Time.deltaTime;
+            return;
+        }
 
         // Adjust speed based on player's score
         float score = playerScore != null ? Mathf.RoundToInt(playerScore.highestY) : 0;
@@ -52,12 +70,8 @@ public class LavaRise : MonoBehaviour
         {
             speedMultiplier = 2f; // Very fast
         }
-        // old system of lava going up faster over time
-        // Speed grows exponentially over time and is adjusted by the multiplier
-        //float currentSpeed = baseSpeed * Mathf.Exp(growthRate * timeElapsed) * speedMultiplier;
 
         // Move the lava up
-        //transform.position += Vector3.up * currentSpeed * Time.deltaTime;
         transform.position += Vector3.up * (baseSpeed * speedMultiplier);
     }
 
@@ -70,17 +84,41 @@ public class LavaRise : MonoBehaviour
                 playerHealth.TakeDamage(1); // Reduce player's health by 1
             }
 
-            // Grant trampoline power-up
+            // Set player's vertical velocity to 0 BEFORE trampoline power-up
+            var rb = collision.gameObject.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+            }
+
+            // Grant trampoline power-up every time
             var trampoline = collision.gameObject.GetComponent<TrampolineJump>();
             var movement = collision.gameObject.GetComponent<PlayerMovement>();
 
-            if (movement != null && trampoline == null)
+            if (movement != null)
             {
-                trampoline = collision.gameObject.AddComponent<TrampolineJump>();
-                trampoline.Initialize(movement);
-                trampoline.Jump(40f); // Example jump height
+                if (trampoline == null)
+                {
+                    trampoline = collision.gameObject.AddComponent<TrampolineJump>();
+                    trampoline.Initialize(movement);
+                }
+                trampoline.Jump(40f); // Always apply the jump
                 Debug.Log("Trampoline power-up granted due to lava collision.");
             }
+
+            // Clamp player above lava
+            if (player != null)
+            {
+                float lavaTop = transform.position.y;
+                Vector3 playerPos = player.position;
+                if (playerPos.y < lavaTop)
+                {
+                    player.position = new Vector3(playerPos.x, lavaTop, playerPos.z);
+                }
+            }
+
+            // Pause lava for a short duration
+            pauseTimer = pauseDuration;
         }
     }
 }
