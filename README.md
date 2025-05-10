@@ -6,7 +6,8 @@ To use the repository and access all its contents, it is **necessary** to instal
 ## How to execute the built file created on Windows for MacOS
 1. Decompremise the TAR file
 2. Open a terminal and enter the following command: cd built.app/Contents/MacOS
-3. Enter the following command: chmod -R 755 game
-4. Now you can double click on the built application and the game should run. Force execute the file if your anti-virus program blocks the execution.
+   You may need to adjust the command to navigate to the “MacOS” directory, depending on where you saved the TAR file.
+4. Enter the following command: chmod -R 755 game
+5. Now you can double click on the built application and the game should run. Force execute the file if your anti-virus program blocks the execution.
 
 
