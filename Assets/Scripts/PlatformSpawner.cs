@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlatformSpawner : MonoBehaviour
@@ -59,6 +60,7 @@ public class PlatformSpawner : MonoBehaviour
     private int consecutiveRightMoves = 0;
     private int totalPlatformsSpawned = 0;
     private int fallingPlatformsInGroup = 0;
+    private int disappearingPlatformsInGroup = 0;
     private bool wasLastPlatformVertical = false; 
     private float platformWidth;
 
@@ -71,7 +73,7 @@ public class PlatformSpawner : MonoBehaviour
         SpawnInitialPlatform();
         
         // Generate initial platforms
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 50; i++)
         {
             GenerateNextPlatform();
         }
@@ -180,20 +182,20 @@ public class PlatformSpawner : MonoBehaviour
         }
         else
         {
-            // For normal platforms, choose between static, disappearing, and falling
+            // Only one falling platform allowed per group of 5 spawned platforms
             bool canSpawnFalling = fallingPlatformsInGroup < 1;
+            // Allow at most two disappearing platforms in a row
+            bool canSpawnDisappearing = disappearingPlatformsInGroup < 2;
             
-            // Don't want to have too many falling platforms too reduce bugs and irritations of the player
+            List<int> options = new() { (int)PlatformType.Static };
+
+            if (canSpawnDisappearing)
+                options.Add((int)PlatformType.Disappearing);
+
             if (canSpawnFalling)
-            {
-                // Can spawn any normal platform type
-                return Random.Range(0, 3); // 0, 1, or 2
-            }
-            else
-            {
-                // Can only spawn static or disappearing
-                return Random.Range(0, 2); // 0 or 1
-            }
+                options.Add((int)PlatformType.Falling);
+
+             return options[Random.Range(0, options.Count)];    
         }
     }
 
@@ -345,6 +347,15 @@ public class PlatformSpawner : MonoBehaviour
             fallingPlatformsInGroup++;
         }
         
+        if (platformIndex == (int)PlatformType.Disappearing)
+        {
+            disappearingPlatformsInGroup++;
+        }
+        else
+        {
+            disappearingPlatformsInGroup = 0;
+        }
+
         // Increment total counter and reset group counters if needed
         totalPlatformsSpawned++;
         if (totalPlatformsSpawned % 5 == 0)
