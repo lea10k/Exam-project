@@ -63,7 +63,7 @@ public class monsterBehavior : MonoBehaviour
             {
                 playerHealth.TakeDamage(1);
             }
-
+            // enemy basically die to prevent multiple damage
             // Disable all colliders after attacking
             foreach (var collider in monsterColliders)
             {
@@ -78,6 +78,38 @@ public class monsterBehavior : MonoBehaviour
                 Debug.Log("Monster moved to Background layer after death.");
             }
         }
+        else if (collision.gameObject.CompareTag("Projectile"))
+        {
+            // Monster dies when hit by a projectile
+            Die();
+
+            // Destroy the projectile
+            Destroy(collision.gameObject);
+        }
+    }
+
+    private void Die()
+    {
+        isAttacking = false;
+        isPaused = true;
+        animator.SetTrigger("death"); // Optional: trigger death animation if exists
+
+        // Disable all colliders
+        foreach (var collider in monsterColliders)
+        {
+            collider.enabled = false;
+        }
+
+        // Change sorting layer to "DeadMonster"
+        var spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.sortingLayerName = "DeadMonster";
+            Debug.Log("Monster moved to Background layer after death.");
+        }
+
+        // Destroy the monster after a short delay to allow animation to play
+        //Destroy(gameObject);
     }
 
     private System.Collections.IEnumerator PauseMovement()
