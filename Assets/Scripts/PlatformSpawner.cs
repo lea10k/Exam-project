@@ -73,7 +73,7 @@ public class PlatformSpawner : MonoBehaviour
         SpawnInitialPlatform();
         
         // Generate initial platforms
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 50; i++)
         {
             GenerateNextPlatform();
         }
@@ -127,10 +127,13 @@ public class PlatformSpawner : MonoBehaviour
         // Create the first static platform at the center (x=0)
         Vector2 startPosition = new Vector2(0f, 0f);
         Instantiate(platformPrefabs[(int)PlatformType.Static], startPosition, Quaternion.identity);
-        
+
         // Initialize tracking variables
         lastSpawnedX = startPosition.x;
         lastSpawnedY = startPosition.y;
+
+        UpdateTrackingVariables((int)PlatformType.Static, startPosition);
+        Debug.Log(totalPlatformsSpawned + "platforms spawned at first");
     }
 
     private bool ShouldGenerateMorePlatforms()
@@ -143,21 +146,22 @@ public class PlatformSpawner : MonoBehaviour
     {
         // Step 1: Select platform type
         int platformIndex = SelectPlatformType();
-        
+
         // Step 2: Calculate spawn position
         Vector2 spawnPosition = CalculateSpawnPosition(platformIndex);
-        
+
         // Step 3: Create the platform
         GameObject platform = Instantiate(platformPrefabs[platformIndex], spawnPosition, Quaternion.identity);
-        
+
         // Step 4: Spawn monster or power-up if platform is static
         if (platformIndex == (int)PlatformType.Static)
         {
             TrySpawnMonsterOrPowerUp(spawnPosition, platform);
         }
-        
+
         // Step 5: Update tracking variables
         UpdateTrackingVariables(platformIndex, spawnPosition);
+        Debug.Log(totalPlatformsSpawned + "platforms spawned");
     }
 
     private int SelectPlatformType()
