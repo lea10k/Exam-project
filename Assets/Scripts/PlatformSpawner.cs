@@ -62,6 +62,7 @@ public class PlatformSpawner : MonoBehaviour
     private int fallingPlatformsInGroup = 0;
     private int disappearingPlatformsInGroup = 0;
     private bool wasLastPlatformVertical = false; 
+    private bool firstSpawn = false;
     private float platformWidth;
 
     void Start()
@@ -71,9 +72,10 @@ public class PlatformSpawner : MonoBehaviour
         
         // Spawn initial platform and setup starting state
         SpawnInitialPlatform();
+        firstSpawn = true;
         
         // Generate initial platforms
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 30; i++)
         {
             GenerateNextPlatform();
         }
@@ -133,7 +135,8 @@ public class PlatformSpawner : MonoBehaviour
         lastSpawnedY = startPosition.y;
 
         UpdateTrackingVariables((int)PlatformType.Static, startPosition);
-        Debug.Log(totalPlatformsSpawned + "platforms spawned at first");
+        Debug.Log(totalPlatformsSpawned + "platforms spawed at first");
+
     }
 
     private bool ShouldGenerateMorePlatforms()
@@ -164,6 +167,17 @@ public class PlatformSpawner : MonoBehaviour
         Debug.Log(totalPlatformsSpawned + "platforms spawned");
     }
 
+    private int ChooseMovingPlatformType()
+    {
+        // Choose randomly between horizontal movers or vertical mover
+        int[] movingOptions = {
+                (int)PlatformType.MovingHorizontal,
+                (int)PlatformType.MovingVertical
+            };
+
+        return movingOptions[Random.Range(0, movingOptions.Length)];
+    }
+
     private int SelectPlatformType()
     {
         // If last platform was moving, force a static platform next
@@ -172,17 +186,16 @@ public class PlatformSpawner : MonoBehaviour
             wasLastPlatformMoving = false;
             return (int)PlatformType.Static;
         }
-        
+
         // Every 5th platform, spawn a moving platform
-        if (totalPlatformsSpawned > 0 && totalPlatformsSpawned % 5 == 0)
+        if (firstSpawn == true && totalPlatformsSpawned > 0 && totalPlatformsSpawned % 4 == 0)
         {
-            // Choose randomly between horizontal movers or vertical mover
-            int[] movingOptions = { 
-                (int)PlatformType.MovingHorizontal, 
-                (int)PlatformType.MovingVertical 
-            };
-            
-            return movingOptions[Random.Range(0, movingOptions.Length)];
+            firstSpawn = false;
+            return ChooseMovingPlatformType();
+        }
+        else if (firstSpawn == false && totalPlatformsSpawned > 0 && totalPlatformsSpawned % 5 == 4)
+        {
+            return ChooseMovingPlatformType();
         }
         else
         {
@@ -190,7 +203,7 @@ public class PlatformSpawner : MonoBehaviour
             bool canSpawnFalling = fallingPlatformsInGroup < 1;
             // Allow at most two disappearing platforms in a row
             bool canSpawnDisappearing = disappearingPlatformsInGroup < 2;
-            
+
             List<int> options = new() { (int)PlatformType.Static };
 
             if (canSpawnDisappearing)
@@ -199,7 +212,7 @@ public class PlatformSpawner : MonoBehaviour
             if (canSpawnFalling)
                 options.Add((int)PlatformType.Falling);
 
-             return options[Random.Range(0, options.Count)];    
+            return options[Random.Range(0, options.Count)];
         }
     }
 
@@ -334,23 +347,23 @@ public class PlatformSpawner : MonoBehaviour
             adjustedY
         );
     }
-    
+
     private void UpdateTrackingVariables(int platformIndex, Vector2 spawnPosition)
     {
         // Update position tracking
         lastSpawnedX = spawnPosition.x;
         lastSpawnedY = spawnPosition.y;
-        
+
         // Update platform type tracking
         wasLastPlatformMoving = IsMovingPlatform(platformIndex);
         wasLastPlatformVertical = platformIndex == (int)PlatformType.MovingVertical;
-        
+
         // Update falling platform counter
         if (platformIndex == (int)PlatformType.Falling)
         {
             fallingPlatformsInGroup++;
         }
-        
+
         if (platformIndex == (int)PlatformType.Disappearing)
         {
             disappearingPlatformsInGroup++;
@@ -359,7 +372,7 @@ public class PlatformSpawner : MonoBehaviour
         {
             disappearingPlatformsInGroup = 0;
         }
-
+        
         // Increment total counter and reset group counters if needed
         totalPlatformsSpawned++;
         if (totalPlatformsSpawned % 5 == 0)
