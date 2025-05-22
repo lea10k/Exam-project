@@ -3,17 +3,26 @@ using UnityEngine;
 
 public class PlatformSpawner : MonoBehaviour
 {
+    // -------------------- Prefab References --------------------
+
     [Header("Prefabs")]
     [Tooltip("Array of platform prefabs (0 = static, 1 = disappearing, 2 = falling, 3-4 = moving)")]
     public GameObject[] platformPrefabs;
+
+    [Tooltip("Monster prefabs (0 = Shark, 1 = GreenSlime)")]
+    public GameObject[] monsterPrefabs;
+
+    [Tooltip("Power-up prefabs")]
+    public GameObject[] powerUpPrefabs;
+
+    // -------------------- Gameplay Settings --------------------
 
     [Header("Playfield")]
     public Transform player;
     [Tooltip("Total playfield width")]
     public float playfieldWidth = 26f;
     [Tooltip("Maximum horizontal movement range (between -maxPath and +maxPath)")]
-    public float maxPath = 11f; 
-    
+    public float maxPath = 11f;
     [Tooltip("Manual Platform width only used if autoDetect = false")]
     public float manualPlatformWidth = 4.4f;
 
@@ -28,41 +37,29 @@ public class PlatformSpawner : MonoBehaviour
     [Tooltip("Maximum consecutive platforms in same direction")]
     public int maxConsecutiveDirections = 4;
 
-    [Header("Monster Settings")]
-    [Tooltip("Monster prefabs (0 = Shark, 1 = GreenSlime)")]
-    public GameObject[] monsterPrefabs;
-    [Tooltip("Chance to spawn a monster on a static platform (0 to 1)")]
-    [Range(0f, 1f)]
-    public float monsterSpawnChance = 0.3f;
+    [Header("Spawn Chances")]
+    [Range(0f, 1f)] public float monsterSpawnChance = 0.3f;
+    [Range(0f, 1f)] public float powerUpSpawnChance = 0.2f;
 
-    [Header("Power-Up Settings")]
-    [Tooltip("Power-up prefabs")]
-    public GameObject[] powerUpPrefabs;
-    [Tooltip("Chance to spawn a power-up on a static platform (0 to 1)")]
-    [Range(0f, 1f)]
-    public float powerUpSpawnChance = 0.2f;
+    // -------------------- Platform Type --------------------
 
-    // Platform type constants for better readability
-    private enum PlatformType
-    {
-        Static = 0,
-        Disappearing = 1,
-        Falling = 2,
-        MovingHorizontal = 3,
-        MovingVertical = 4
-    }
+    private enum PlatformType { Static, Disappearing, Falling, MovingHorizontal, MovingVertical }
 
-    // Internal tracking variables
+    // -------------------- Internal State --------------------
+
+    private float platformWidth;
+    private float lastSpawnedX = 0f;
     private float lastSpawnedY = 0f;
-    private float lastSpawnedX = 0f; // Start at the center (x=0)
-    private bool wasLastPlatformMoving = false;
+    private int totalPlatformsSpawned = 0;
     private int consecutiveLeftMoves = 0;
     private int consecutiveRightMoves = 0;
-    private int totalPlatformsSpawned = 0;
     private int fallingPlatformsInGroup = 0;
     private int disappearingPlatformsInGroup = 0;
-    private bool wasLastPlatformVertical = false; 
-    private float platformWidth;
+    private bool wasLastPlatformMoving = false;
+    private bool wasLastPlatformVertical = false;
+    private bool firstSpawn = false;
+
+    // -------------------- Unity Lifecycle --------------------
 
     void Start()
     {
@@ -71,14 +68,25 @@ public class PlatformSpawner : MonoBehaviour
         
         // Spawn initial platform and setup starting state
         SpawnInitialPlatform();
+        firstSpawn = true;
         
         // Generate initial platforms
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 10; i++)
+        {
+            GenerateNextPlatform();
+        }
+    }
+    
+    void Update()
+    {
+        // Generate new platforms when player approaches the highest one
+        if (ShouldGenerateMorePlatforms())
         {
             GenerateNextPlatform();
         }
     }
 
+    // -------------------- Initialization --------------------
     private void InitializePlatformWidth()
     {
         // Try to detect platform width from the first platform prefab
@@ -88,14 +96,13 @@ public class PlatformSpawner : MonoBehaviour
             // Get width from the renderer's bounds
             platformWidth = renderer.bounds.size.x;
             Debug.Log($"Auto-detected platform width: {platformWidth}");
-        } 
+        }
         else
         {
             // Use the manual platform width
             platformWidth = manualPlatformWidth;
         }
     }
-
     private void ValidatePlayfieldSettings()
     {
         // Make sure maxPath doesn't exceed half the playfield width
@@ -113,13 +120,11 @@ public class PlatformSpawner : MonoBehaviour
         }
     }
 
-    void Update()
+    // -------------------- Platform Spawning --------------------
+    private bool ShouldGenerateMorePlatforms()
     {
-        // Generate new platforms when player approaches the highest one
-        if (ShouldGenerateMorePlatforms())
-        {
-            GenerateNextPlatform();
-        }
+        // Check if player is getting close to the highest platform
+        return player.position.y + generationLookAhead > lastSpawnedY;
     }
 
     private void SpawnInitialPlatform()
@@ -127,37 +132,36 @@ public class PlatformSpawner : MonoBehaviour
         // Create the first static platform at the center (x=0)
         Vector2 startPosition = new Vector2(0f, 0f);
         Instantiate(platformPrefabs[(int)PlatformType.Static], startPosition, Quaternion.identity);
-        
+
         // Initialize tracking variables
         lastSpawnedX = startPosition.x;
         lastSpawnedY = startPosition.y;
-    }
 
-    private bool ShouldGenerateMorePlatforms()
-    {
-        // Check if player is getting close to the highest platform
-        return player.position.y + generationLookAhead > lastSpawnedY;
+        UpdateTrackingVariables((int)PlatformType.Static, startPosition);
+        Debug.Log(totalPlatformsSpawned + "platforms spawed at first");
+
     }
 
     private void GenerateNextPlatform()
     {
         // Step 1: Select platform type
         int platformIndex = SelectPlatformType();
-        
+
         // Step 2: Calculate spawn position
         Vector2 spawnPosition = CalculateSpawnPosition(platformIndex);
-        
+
         // Step 3: Create the platform
         GameObject platform = Instantiate(platformPrefabs[platformIndex], spawnPosition, Quaternion.identity);
-        
+
         // Step 4: Spawn monster or power-up if platform is static
         if (platformIndex == (int)PlatformType.Static)
         {
             TrySpawnMonsterOrPowerUp(spawnPosition, platform);
         }
-        
+
         // Step 5: Update tracking variables
         UpdateTrackingVariables(platformIndex, spawnPosition);
+        Debug.Log(totalPlatformsSpawned + "platforms spawned");
     }
 
     private int SelectPlatformType()
@@ -168,17 +172,16 @@ public class PlatformSpawner : MonoBehaviour
             wasLastPlatformMoving = false;
             return (int)PlatformType.Static;
         }
-        
+
         // Every 5th platform, spawn a moving platform
-        if (totalPlatformsSpawned > 0 && totalPlatformsSpawned % 5 == 0)
+        if (firstSpawn == true && totalPlatformsSpawned > 0 && totalPlatformsSpawned % 4 == 0)
         {
-            // Choose randomly between horizontal movers or vertical mover
-            int[] movingOptions = { 
-                (int)PlatformType.MovingHorizontal, 
-                (int)PlatformType.MovingVertical 
-            };
-            
-            return movingOptions[Random.Range(0, movingOptions.Length)];
+            firstSpawn = false;
+            return ChooseMovingPlatformType();
+        }
+        else if (firstSpawn == false && totalPlatformsSpawned > 0 && totalPlatformsSpawned % 5 == 4)
+        {
+            return ChooseMovingPlatformType();
         }
         else
         {
@@ -186,7 +189,7 @@ public class PlatformSpawner : MonoBehaviour
             bool canSpawnFalling = fallingPlatformsInGroup < 1;
             // Allow at most two disappearing platforms in a row
             bool canSpawnDisappearing = disappearingPlatformsInGroup < 2;
-            
+
             List<int> options = new() { (int)PlatformType.Static };
 
             if (canSpawnDisappearing)
@@ -195,9 +198,22 @@ public class PlatformSpawner : MonoBehaviour
             if (canSpawnFalling)
                 options.Add((int)PlatformType.Falling);
 
-             return options[Random.Range(0, options.Count)];    
+            return options[Random.Range(0, options.Count)];
         }
     }
+
+    private int ChooseMovingPlatformType()
+    {
+        // Choose randomly between horizontal movers or vertical mover
+        int[] movingOptions = {
+                (int)PlatformType.MovingHorizontal,
+                (int)PlatformType.MovingVertical
+            };
+
+        return movingOptions[Random.Range(0, movingOptions.Length)];
+    }
+
+    // -------------------- Position Calculation --------------------
 
     private Vector2 CalculateSpawnPosition(int platformIndex)
     {
@@ -205,7 +221,7 @@ public class PlatformSpawner : MonoBehaviour
         float spawnX = CalculateHorizontalPosition();
         float verticalSpaceFromPosB = 1f;
         float spawnY;
-        
+
         // Calculate vertical position (always above last platform)
         if (wasLastPlatformVertical)
         {
@@ -217,7 +233,7 @@ public class PlatformSpawner : MonoBehaviour
         }
         // Apply platform-specific position adjustments
         Vector2 spawnPosition = AdjustPositionForPlatformType(platformIndex, spawnX, spawnY);
-        
+
         return spawnPosition;
     }
     
@@ -330,23 +346,25 @@ public class PlatformSpawner : MonoBehaviour
             adjustedY
         );
     }
-    
+
+    // -------------------- Tracking & Rules --------------------
+
     private void UpdateTrackingVariables(int platformIndex, Vector2 spawnPosition)
     {
         // Update position tracking
         lastSpawnedX = spawnPosition.x;
         lastSpawnedY = spawnPosition.y;
-        
+
         // Update platform type tracking
         wasLastPlatformMoving = IsMovingPlatform(platformIndex);
         wasLastPlatformVertical = platformIndex == (int)PlatformType.MovingVertical;
-        
+
         // Update falling platform counter
         if (platformIndex == (int)PlatformType.Falling)
         {
             fallingPlatformsInGroup++;
         }
-        
+
         if (platformIndex == (int)PlatformType.Disappearing)
         {
             disappearingPlatformsInGroup++;
@@ -370,6 +388,8 @@ public class PlatformSpawner : MonoBehaviour
         return platformIndex >= (int)PlatformType.MovingHorizontal && 
                platformIndex <= (int)PlatformType.MovingVertical;
     }
+
+    // -------------------- Spawning Extras --------------------
 
     private void TrySpawnMonsterOrPowerUp(Vector2 platformPosition, GameObject platform)
     {
@@ -395,6 +415,8 @@ public class PlatformSpawner : MonoBehaviour
             Instantiate(powerUpPrefab, powerUpPosition, Quaternion.identity, platform.transform);
         }
     }
+
+    // -------------------- Gizmos --------------------
 
     // For debugging
     void OnDrawGizmos()
