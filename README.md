@@ -90,7 +90,3 @@ Follow the instructions here: [GitHub - Installing Git Large File Storage](https
 
 - Developed by [lea10k](https://github.com/lea10k)
 - Developt by [EfusRyuga](https://github.com/EfusRyuga)
-
-## License
-
-[Specify your license here, e.g., MIT License. If you haven't chosen a license, you can add one from GitHub's templates.]
