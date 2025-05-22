@@ -58,13 +58,32 @@ Follow the instructions here: [GitHub - Installing Git Large File Storage](https
 ## Project Structure
 
 ```
-Assets/
-   
-  Scripts/         # C# scripts for game logic
-  Scenes/          # Unity scenes
-  Prefabs/         # Game objects and prefabs
-  ...
-README.md
+...
+├── Assets
+│   ├── Animated effects
+│   ├── Art
+│   ├── Buttons
+│   ├── Chibi Monster Free (Unique Skill Animated Prefab with SFX)
+│   ├── DefaultVolumeProfile.asset
+│   ├── Editor
+│   ├── Fonts
+│   ├── MainMenuBG.png
+│   ├── Materials
+│   ├── Nine Pines Animation
+│   ├── Prefabs
+│   ├── Presets
+│   ├── Resources
+│   ├── Scenes
+│   ├── Scripts
+│   ├── Settings
+│   ├── Settings.meta
+│   ├── test_scene.unity
+│   ├── TextMesh Pro
+│   ├── UI
+│   ├── UI pack
+│   ├── UniversalRenderPipelineGlobalSettings.asset
+│   ├── Warped Shooting Fx
+...
 ```
 
 ## Credits
