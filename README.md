@@ -32,7 +32,7 @@ Follow the instructions here: [GitHub - Installing Git Large File Storage](https
 - Unity (specify version, e.g., 2021.3 or later)
 - Git LFS extention
 
-## How to Execute the Built File on MacOS
+## How to Execute the Built File on MacOS that was created on Windows
 
 > **Note:** The built file for Mac cannot be compressed as a ZIP file. If you do, the game will no longer be executable. Therefor, a TAR file is the best solution. 
 
