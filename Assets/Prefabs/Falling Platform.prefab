@@ -196,6 +196,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   platformPrefab: {fileID: 1275611628323592775, guid: 53ea9d25ffc46bd48a536e582b9e0473, type: 3}
-  fallDelay: 1
+  fallDelay: 1.5
   destroyDelay: 2
-  timeToReloadPlatform: 2
+  timeToReloadPlatform: 1.5
