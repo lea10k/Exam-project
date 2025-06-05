@@ -11,9 +11,14 @@ public class ReloadGame : MonoBehaviour
     private GUIStyle promptStyle;
 
     void Start()
-    {
+
+        // Initialize style for the reload hint text. Avoid using
+        // GUI skin properties outside of OnGUI to prevent runtime errors.
+        promptStyle = new GUIStyle
+
         // Initialize style for the reload hint text
         promptStyle = new GUIStyle(GUI.skin.label)
+
         {
             fontSize = 18,
             alignment = TextAnchor.LowerCenter,

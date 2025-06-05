@@ -54,8 +54,7 @@ Follow the instructions here: [GitHub - Installing Git Large File Storage](https
 - **Jump:** Press the **Space Bar**
   > **Note:** The space bar should be pressed harder and longer to reach other objects properly. 
 - **Use Weapon:** Press the **E** key
-- **Reload Level:** Press **R** or click the reload button. A short on-screen hint reminds you of this during play.
-
+- **Reload Level:** Press **R**. A short on-screen hint reminds you of this during play.
 
 
 ## Project Structure
