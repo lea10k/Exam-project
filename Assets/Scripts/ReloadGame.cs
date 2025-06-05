@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 /// Optionally the scene can be reloaded by pressing the 'R' key.
 /// </summary>
 public class ReloadGame : MonoBehaviour
-
+{
     private GUIStyle promptStyle;
 
     void Start()
