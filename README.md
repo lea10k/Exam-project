@@ -91,4 +91,4 @@ Follow the instructions here: [GitHub - Installing Git Large File Storage](https
 ## Credits
 
 - Developed by [lea10k](https://github.com/lea10k)
-- Developt by [EfusRyuga](https://github.com/EfusRyuga)
+- Developed by [EfusRyuga](https://github.com/EfusRyuga)
