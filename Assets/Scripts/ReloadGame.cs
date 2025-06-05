@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 /// Optionally the scene can be reloaded by pressing the 'R' key.
 /// </summary>
 public class ReloadGame : MonoBehaviour
-{
+
     private GUIStyle promptStyle;
 
     void Start()
@@ -38,6 +38,7 @@ public class ReloadGame : MonoBehaviour
             GUI.Label(rect, "Press 'R' to reload level", promptStyle);
         }
     }
+
 
     /// <summary>
     /// Reloads the active scene and resets time scale.

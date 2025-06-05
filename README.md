@@ -56,11 +56,7 @@ Follow the instructions here: [GitHub - Installing Git Large File Storage](https
 - **Use Weapon:** Press the **E** key
 - **Reload Level:** Press **R** or click the reload button. A short on-screen hint reminds you of this during play.
 
-### Adding a Reload Button
-To include an on-screen reload button:
-1. Create a new **Button** in the GameplayScene canvas.
-2. Attach the **ReloadGame** script to any GameObject (for example the button itself).
-3. In the Button's **OnClick** list, choose the object with the script and select `ReloadGame.ReloadCurrentScene`.
+
 
 ## Project Structure
 
