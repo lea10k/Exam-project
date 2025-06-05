@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 /// <summary>
 /// Simple helper to reload the current gameplay scene. Attach this script to a UI
@@ -8,18 +9,14 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class ReloadGame : MonoBehaviour
 {
-    private GUIStyle promptStyle;
+    public TextMeshProUGUI hintText;
 
     void Start()
     {
-        // Initialize style for the reload hint text. Avoid using
-        // GUI skin properties outside of OnGUI to prevent runtime errors.
-        promptStyle = new GUIStyle(GUI.skin.label)
+        if (hintText != null)
         {
-            fontSize = 18,
-            alignment = TextAnchor.LowerCenter,
-            normal = { textColor = Color.white }
-        };
+            hintText.text = "Press 'R' to reload";
+        }
     }
 
     void Update()
@@ -30,16 +27,6 @@ public class ReloadGame : MonoBehaviour
             ReloadCurrentScene();
         }
     }
-
-    void OnGUI()
-    {
-        if (promptStyle != null)
-        {
-            Rect rect = new Rect(0, Screen.height - 30, Screen.width, 30);
-            GUI.Label(rect, "Press 'R' to reload level", promptStyle);
-        }
-    }
-
 
     /// <summary>
     /// Reloads the active scene and resets time scale.
