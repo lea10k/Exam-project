@@ -1,4 +1,4 @@
-# Exam-project
+# Our First Platformer
 
 ## Overview
 
